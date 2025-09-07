@@ -22,7 +22,7 @@ public class MarketDataProcessor
     // Track last publish time per symbol to enforce one update per window
     private final ConcurrentHashMap<String, Long> lastPublishTimePerSymbol;
 
-    private volatile double availableTokens;
+    private volatile int availableTokens;
     private volatile long lastRefillTime;
 
     public MarketDataProcessor(Consumer<MarketData> publishHandler)
@@ -64,9 +64,9 @@ public class MarketDataProcessor
 
     private synchronized boolean tryConsumeToken()
     {
-        if (availableTokens >= 1.0)
+        if (availableTokens >= 1)
         {
-            availableTokens -= 1.0;
+            availableTokens -= 1;
             logger.info("Consume 1 token, with number of tokens now: " + availableTokens);
             return true;
         }
@@ -82,7 +82,7 @@ public class MarketDataProcessor
             {
                 refillTokensIfNeeded();
 
-                if (availableTokens >= 1.0 && !marketDataQueue.isEmpty() && tryConsumeToken())
+                if (availableTokens >= 1 && !marketDataQueue.isEmpty() && tryConsumeToken())
                 {
                     while (!marketDataQueue.isEmpty())
                     {
